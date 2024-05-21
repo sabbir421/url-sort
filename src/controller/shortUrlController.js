@@ -8,6 +8,7 @@ const {
 } = require("../model/shortUrlModel");
 exports.shortUrl = async (req, res) => {
   try {
+  
     const { originalUrl } = req.body;
     console.log(originalUrl);
     if (!validUrl.isUri(originalUrl)) {
@@ -15,7 +16,7 @@ exports.shortUrl = async (req, res) => {
     }
     let url = await getUrl(originalUrl);
     if (url) {
-      res.json(url);
+      return res.response.success(url, "short url");
     } else {
       const urlCode = shortid.generate();
       const shortUrl = `${req.protocol}://${req.get("host")}/${urlCode}`;
@@ -28,7 +29,6 @@ exports.shortUrl = async (req, res) => {
       return res.response.success(response, "url short");
     }
   } catch (error) {
-    console.log(error);
     errorResponseHandler(res, error);
   }
 };
@@ -36,15 +36,14 @@ exports.shortUrl = async (req, res) => {
 exports.getSortUrl = async (req, res) => {
   try {
     const { code } = req.params;
-   
+
     const url = await getUrlByCode(code);
     if (url) {
       return res.redirect(url.originalUrl);
     } else {
-      return res.status(404).json("No URL found");
+      return res.response.fail(null, "No URL found", {});
     }
   } catch (error) {
-    console.log(error);
     errorResponseHandler(res, error);
   }
 };
